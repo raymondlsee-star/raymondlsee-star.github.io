@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Raymond See — Lead Software Engineer</title>
+<meta name="description" content="Raymond See is a lead front-end engineer with 16+ years of experience in UI/UX design, front-end architecture, accessibility, and design systems. Currently Design Engineer (Contract) at Meta.">
+<style>
+  :root {
+    --bg: #fafaf8;
+    --bg-soft: #f3f2ee;
+    --ink: #1c1a16;
+    --ink-soft: #57534a;
+    --line: #e4e1d8;
+    --accent: #2f5fe3;
+    --accent-soft: #e8eefc;
+    --card: #ffffff;
+    --radius: 14px;
+    --max: 1060px;
+    --serif: Georgia, 'Times New Roman', serif;
+    --sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', Inter, Roboto, Helvetica, Arial, sans-serif;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: var(--sans);
+    background: var(--bg);
+    color: var(--ink);
+    line-height: 1.65;
+    -webkit-font-smoothing: antialiased;
+  }
+  a { color: var(--accent); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+
+  /* ---------- nav ---------- */
+  nav {
+    position: sticky; top: 0; z-index: 50;
+    background: rgba(250,250,248,.88);
+    backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--line);
+  }
+  .nav-inner {
+    max-width: var(--max); margin: 0 auto; padding: 14px 24px;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .brand { font-family: var(--serif); font-weight: bold; font-size: 19px; color: var(--ink); }
+  .brand:hover { text-decoration: none; }
+  .nav-links { display: flex; gap: 26px; font-size: 14.5px; }
+  .nav-links a { color: var(--ink-soft); }
+  .nav-links a:hover { color: var(--ink); text-decoration: none; }
+  .menu-btn { display: none; background: none; border: 1px solid var(--line); border-radius: 8px; padding: 7px 12px; font-size: 15px; cursor: pointer; color: var(--ink); }
+
+  /* ---------- hero ---------- */
+  .hero {
+    max-width: var(--max); margin: 0 auto; padding: 96px 24px 72px;
+    display: grid; grid-template-columns: 1.6fr 1fr; gap: 48px; align-items: center;
+  }
+  .eyebrow {
+    display: inline-block; font-size: 13px; letter-spacing: 2.5px; text-transform: uppercase;
+    color: var(--accent); font-weight: 600; margin-bottom: 18px;
+  }
+  h1 {
+    font-family: var(--serif); font-size: clamp(42px, 6vw, 64px);
+    line-height: 1.08; letter-spacing: -0.5px; margin-bottom: 16px;
+  }
+  .hero-sub { font-size: 19px; color: var(--ink-soft); max-width: 34em; margin-bottom: 10px; }
+  .hero-sub strong { color: var(--ink); font-weight: 600; }
+  .hero-meta { font-size: 14.5px; color: var(--ink-soft); margin: 14px 0 28px; }
+  .hero-meta span + span::before { content: "·"; margin: 0 10px; color: var(--line); }
+  .cta-row { display: flex; gap: 14px; flex-wrap: wrap; }
+  .btn {
+    display: inline-block; padding: 13px 26px; border-radius: 999px;
+    font-size: 15.5px; font-weight: 600; border: 1.5px solid var(--ink);
+    transition: transform .15s ease, box-shadow .15s ease;
+  }
+  .btn:hover { text-decoration: none; transform: translateY(-2px); }
+  .btn-primary { background: var(--ink); color: #fff; }
+  .btn-primary:hover { box-shadow: 0 8px 22px rgba(28,26,22,.25); }
+  .btn-ghost { background: transparent; color: var(--ink); }
+  .avatar-card {
+    background: var(--card); border: 1px solid var(--line); border-radius: var(--radius);
+    padding: 40px 32px; text-align: center; box-shadow: 0 12px 40px rgba(28,26,22,.07);
+  }
+  .avatar {
+    width: 108px; height: 108px; border-radius: 50%; margin: 0 auto 18px;
+    background: linear-gradient(135deg, var(--accent), #7a3ff2);
+    color: #fff; font-family: var(--serif); font-size: 40px; font-weight: bold;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .avatar-card h3 { font-family: var(--serif); font-size: 21px; margin-bottom: 6px; }
+  .avatar-card p { font-size: 14.5px; color: var(--ink-soft); }
+  .stat-row { display: flex; justify-content: center; gap: 28px; margin-top: 22px; padding-top: 22px; border-top: 1px solid var(--line); }
+  .stat b { display: block; font-size: 24px; font-family: var(--serif); }
+  .stat span { font-size: 12.5px; color: var(--ink-soft); text-transform: uppercase; letter-spacing: 1px; }
+
+  /* ---------- sections ---------- */
+  section { max-width: var(--max); margin: 0 auto; padding: 64px 24px; }
+  .sec-label {
+    font-size: 13px; letter-spacing: 2.5px; text-transform: uppercase;
+    color: var(--accent); font-weight: 600; margin-bottom: 10px;
+  }
+  h2.sec-title { font-family: var(--serif); font-size: clamp(28px, 4vw, 38px); margin-bottom: 14px; letter-spacing: -0.3px; }
+  .sec-intro { color: var(--ink-soft); font-size: 17px; max-width: 44em; margin-bottom: 36px; }
+  .alt { background: var(--bg-soft); border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+  .alt > .wrap { max-width: var(--max); margin: 0 auto; padding: 64px 24px; }
+
+  /* ---------- about ---------- */
+  .about-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; }
+  .about-grid p { color: var(--ink-soft); font-size: 16.5px; margin-bottom: 16px; }
+  .about-grid p strong { color: var(--ink); }
+  .focus-list { list-style: none; margin-top: 6px; }
+  .focus-list li {
+    background: var(--card); border: 1px solid var(--line); border-radius: 10px;
+    padding: 12px 18px; margin-bottom: 10px; font-size: 15.5px;
+  }
+  .focus-list li::before { content: "→ "; color: var(--accent); font-weight: 700; }
+
+  /* ---------- timeline ---------- */
+  .timeline { position: relative; margin-top: 8px; padding-left: 30px; }
+  .timeline::before {
+    content: ""; position: absolute; left: 8px; top: 8px; bottom: 8px; width: 2px; background: var(--line);
+  }
+  .job { position: relative; padding-bottom: 38px; }
+  .job:last-child { padding-bottom: 0; }
+  .job::before {
+    content: ""; position: absolute; left: -27px; top: 7px; width: 12px; height: 12px;
+    border-radius: 50%; background: var(--bg); border: 3px solid var(--accent);
+  }
+  .job.current::before { background: var(--accent); box-shadow: 0 0 0 5px var(--accent-soft); }
+  .job-head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 8px 14px; margin-bottom: 4px; }
+  .job-title { font-family: var(--serif); font-size: 21px; }
+  .job-co { font-weight: 600; font-size: 16px; }
+  .badge {
+    font-size: 12px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase;
+    background: var(--accent-soft); color: var(--accent); border-radius: 999px; padding: 3px 12px;
+  }
+  .job-dates { font-size: 14px; color: var(--ink-soft); margin-bottom: 10px; }
+  .job ul { margin-left: 20px; color: var(--ink-soft); font-size: 15.5px; }
+  .job ul li { margin-bottom: 7px; }
+  .job ul li::marker { color: var(--accent); }
+
+  /* ---------- skills ---------- */
+  .skill-groups { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 22px; }
+  .skill-card { background: var(--card); border: 1px solid var(--line); border-radius: var(--radius); padding: 26px; }
+  .skill-card h3 { font-family: var(--serif); font-size: 18px; margin-bottom: 14px; }
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; }
+  .chip {
+    font-size: 13.5px; background: var(--bg-soft); border: 1px solid var(--line);
+    border-radius: 999px; padding: 5px 13px; color: var(--ink);
+  }
+  .chip.hot { background: var(--accent-soft); border-color: #c9d6f8; font-weight: 600; }
+
+  /* ---------- education ---------- */
+  .edu-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 22px; }
+  .edu-card { background: var(--card); border: 1px solid var(--line); border-radius: var(--radius); padding: 28px; }
+  .edu-card h3 { font-family: var(--serif); font-size: 19px; margin-bottom: 4px; }
+  .edu-card .deg { font-weight: 600; font-size: 15.5px; }
+  .edu-card p { color: var(--ink-soft); font-size: 14.5px; margin-top: 6px; }
+
+  /* ---------- contact ---------- */
+  .contact-box {
+    background: var(--ink); color: #f5f4f0; border-radius: 20px;
+    padding: 56px 48px; text-align: center;
+  }
+  .contact-box h2 { font-family: var(--serif); font-size: clamp(28px, 4vw, 40px); margin-bottom: 12px; }
+  .contact-box p { color: #b9b4a8; font-size: 16.5px; max-width: 36em; margin: 0 auto 28px; }
+  .contact-links { display: flex; justify-content: center; gap: 14px; flex-wrap: wrap; }
+  .contact-links a {
+    color: #fff; border: 1.5px solid #4a463d; border-radius: 999px; padding: 11px 24px;
+    font-size: 15px; font-weight: 600;
+  }
+  .contact-links a:hover { border-color: #fff; text-decoration: none; background: rgba(255,255,255,.06); }
+  footer { text-align: center; padding: 36px 24px; color: var(--ink-soft); font-size: 13.5px; }
+
+  /* ---------- reveal ---------- */
+  .reveal { opacity: 0; transform: translateY(22px); transition: opacity .6s ease, transform .6s ease; }
+  .reveal.visible { opacity: 1; transform: none; }
+
+  @media (max-width: 860px) {
+    .hero { grid-template-columns: 1fr; padding-top: 64px; }
+    .about-grid, .edu-grid { grid-template-columns: 1fr; }
+    .nav-links { display: none; position: absolute; top: 100%; left: 0; right: 0; background: var(--bg); flex-direction: column; padding: 18px 24px; border-bottom: 1px solid var(--line); gap: 14px; }
+    .nav-links.open { display: flex; }
+    .menu-btn { display: block; }
+    nav .nav-inner { position: relative; }
+    .contact-box { padding: 40px 26px; }
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-inner">
+    <a class="brand" href="#top">Raymond See</a>
+    <div class="nav-links" id="navLinks">
+      <a href="#about">About</a>
+      <a href="#experience">Experience</a>
+      <a href="#skills">Skills</a>
+      <a href="#education">Education</a>
+      <a href="#contact">Contact</a>
+    </div>
+    <button class="menu-btn" id="menuBtn" aria-label="Menu">☰</button>
+  </div>
+</nav>
+
+<header class="hero" id="top">
+  <div>
+    <span class="eyebrow">Lead Software Engineer</span>
+    <h1>Building accessible, human-centered interfaces for the web.</h1>
+    <p class="hero-sub">I'm <strong>Raymond See</strong>, a front-end engineer with <strong>16+ years</strong> of experience across UI/UX design, front-end architecture, and accessibility — currently a <strong>Design Engineer (Contract) at Meta</strong>, exploring AI integration in UI.</p>
+    <p class="hero-meta"><span>Belmont, California</span><span>Open to on-site · hybrid · remote</span></p>
+    <div class="cta-row">
+      <a class="btn btn-primary" href="#contact">Get in touch</a>
+      <a class="btn btn-ghost" href="https://www.linkedin.com/in/raymond-see-dev/" target="_blank" rel="noopener">LinkedIn ↗</a>
+    </div>
+  </div>
+  <div class="avatar-card reveal">
+    <div class="avatar">RS</div>
+    <h3>Raymond See</h3>
+    <p>Front-End · Accessibility · Design Systems<br>React · Angular · TypeScript</p>
+    <div class="stat-row">
+      <div class="stat"><b>16+</b><span>Years</span></div>
+      <div class="stat"><b>10</b><span>Roles</span></div>
+      <div class="stat"><b>4</b><span>Industries</span></div>
+    </div>
+  </div>
+</header>
+
+<section id="about">
+  <div class="sec-label reveal">About</div>
+  <h2 class="sec-title reveal">Engineer at the intersection of design and code</h2>
+  <div class="about-grid">
+    <div class="reveal">
+      <p>For over sixteen years I've worked across the full cycle of web development — from early e-commerce and CMS builds to leading front-end architecture at <strong>Visa</strong>, where I spent 13+ years shipping accessible, high-traffic digital experiences, including the rebuild of Visa.com.</p>
+      <p>As a <strong>Lead Design Engineer</strong>, I bridge design and engineering: translating complex designs into responsive, scalable, ADA-compliant interfaces, mentoring developers, and defining front-end best practices inside large design systems.</p>
+      <p>Most recently I've been working on <strong>AI-powered design engineering</strong> — LLM-based design review, RAG knowledge platforms, and computer-vision analysis of UI — bringing machine intelligence into the design workflow itself.</p>
+    </div>
+    <div class="reveal">
+      <ul class="focus-list">
+        <li><strong>Accessibility first:</strong> WCAG 2.1 / ADA-compliant interfaces as a default, not an afterthought</li>
+        <li><strong>Design systems:</strong> scalable, visually consistent component architecture</li>
+        <li><strong>AI + UI:</strong> LLM judges, RAG retrieval, and computer vision for design intelligence</li>
+        <li><strong>Mentorship:</strong> growing front-end developers and setting engineering standards</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<div class="alt" id="experience">
+  <div class="wrap">
+    <div class="sec-label reveal">Experience</div>
+    <h2 class="sec-title reveal">Where I've worked</h2>
+    <p class="sec-intro reveal">A decade and a half across fintech, biotech, AI research, e-commerce, and media — always close to the interface.</p>
+    <div class="timeline">
+
+      <div class="job current reveal">
+        <div class="job-head"><span class="job-title">Design Engineer</span><span class="badge">Current</span></div>
+        <div class="job-co">Meta · Contract</div>
+        <div class="job-dates">Dec 2025 – Present · Menlo Park, CA · Hybrid</div>
+        <ul>
+          <li>Built and shipped AI-powered design engineering systems across LLM-based design review, computer vision, design intelligence, and RAG/knowledge retrieval.</li>
+          <li>Architected the "FB Org Knowledge Store," a production RAG platform letting AI agents answer Facebook-specific research questions with citations.</li>
+          <li>Built an AI evaluation framework with calibrated LLM judges, golden datasets, quality metrics, and a two-reviewer validation workflow.</li>
+          <li>Extended an AI review app with multimodal understanding of Figma frames and Google Docs/Slides images — improving perception performance 2.5×.</li>
+          <li>Built "AI Visualization," a computer-vision service for analyzing UI designs: component recognition, typography/color/layout measurement, and WCAG contrast analysis.</li>
+        </ul>
+      </div>
+
+      <div class="job reveal">
+        <div class="job-head"><span class="job-title">Senior Software Engineer</span></div>
+        <div class="job-co">Genentech · Contract</div>
+        <div class="job-dates">Jun 2025 – Dec 2025 · South San Francisco, CA · Hybrid</div>
+        <ul>
+          <li>Led modernization of legacy research applications, improving usability for scientists.</li>
+          <li>Streamlined tracking of animal health, transfers, and orders with cross-functional teams.</li>
+          <li>Improved data accuracy and cut processing time by 30%.</li>
+        </ul>
+      </div>
+
+      <div class="job reveal">
+        <div class="job-head"><span class="job-title">Lead Software Engineer</span></div>
+        <div class="job-co">Visa · Full-time</div>
+        <div class="job-dates">Oct 2021 – May 2025 · Foster City, CA · On-site</div>
+        <ul>
+          <li>Drove architecture and implementation of scalable, accessible, visually consistent front-end solutions across Visa's digital platforms.</li>
+          <li>Bridged design and engineering to deliver high-fidelity, ADA-compliant experiences meeting performance and usability standards.</li>
+          <li>Mentored developers and defined front-end best practices, advancing accessibility and modern UX within scalable design systems.</li>
+        </ul>
+      </div>
+
+      <div class="job reveal">
+        <div class="job-head"><span class="job-title">Senior Staff Software Engineer</span></div>
+        <div class="job-co">Visa · Full-time</div>
+        <div class="job-dates">Oct 2014 – Oct 2021 · Foster City, CA · On-site</div>
+        <ul>
+          <li>Independently ran key front-end initiatives end to end.</li>
+          <li>Led the rebuild of next-generation Visa.com with the Marketing team on the AEM platform.</li>
+          <li>Served as the team's accessibility expert, ensuring WCAG-compliant UI components meeting ADA standards.</li>
+        </ul>
+      </div>
+
+      <div class="job reveal">
+        <div class="job-head"><span class="job-title">Staff Software Engineer</span></div>
+        <div class="job-co">Visa · Full-time</div>
+        <div class="job-dates">Jan 2012 – Oct 2014 · Foster City, CA · On-site</div>
+        <ul>
+          <li>Front-end developer on the Visa UX team building prototypes, UI widgets, reusable components, and full web apps.</li>
+          <li>Helped modernize legacy applications with improved UX and responsive design.</li>
+          <li>Built high-fidelity clickable prototypes used by sales engineers to demo Visa products.</li>
+        </ul>
+      </div>
+
+      <div class="job reveal">
+        <div class="job-head"><span class="job-title">Senior Software Engineer</span></div>
+        <div class="job-co">Payvment</div>
+        <div class="job-dates">2010 – Jan 2012 · Palo Alto, CA</div>
+        <ul>
+          <li>Developed e-commerce infrastructure components with PHP, MySQL, and Python.</li>
+          <li>Built a Lucene/SOLR search engine replacing MySQL queries — an 8× search-speed increase.</li>
+        </ul>
+      </div>
+
+      <div class="job reveal">
+        <div class="job-head"><span class="job-title">Software Engineer</span></div>
+        <div class="job-co">Liberty Media (PicksPal)</div>
+        <div class="job-dates">Jan 2008 – Apr 2010 · Santa Clara, CA</div>
+        <ul>
+          <li>Full-cycle development of sports Facebook apps (Trading Post, Bracket Mania).</li>
+          <li>Built corporate websites and backend CMS for Fox Sports Network regions.</li>
+          <li>Designed and developed the BuzzerSports.com e-commerce site with promo modules, Facebook Connect, and PayPal integration.</li>
+        </ul>
+      </div>
+
+      <div class="job reveal">
+        <div class="job-head"><span class="job-title">Software Engineer</span></div>
+        <div class="job-co">Aerio Inc</div>
+        <div class="job-dates">Jan 2007 – Jan 2008</div>
+        <ul>
+          <li>Full-cycle development of web apps with PHP 5, JavaScript, Java, MySQL, and web services.</li>
+          <li>Built an internal AJAX-heavy timesheet application.</li>
+        </ul>
+      </div>
+
+      <div class="job reveal">
+        <div class="job-head"><span class="job-title">Web Master</span></div>
+        <div class="job-co">i-Tech Company</div>
+        <div class="job-dates">2005 – 2007</div>
+        <ul>
+          <li>Maintained and developed the company's e-shopping site; built tools such as Rack Picker and KVM Picker.</li>
+          <li>Administered the CMS and MySQL database.</li>
+        </ul>
+      </div>
+
+      <div class="job reveal">
+        <div class="job-head"><span class="job-title">Freelance WordPress Developer</span></div>
+        <div class="job-co">Self-employed</div>
+        <div class="job-dates">Sep 2003 – Nov 2008 · San Francisco Bay Area · Remote</div>
+        <ul>
+          <li>Helped local businesses establish an online presence — tea brands, restaurants, an IT support company, a charter bus service, an eco-friendly utensils company, and more.</li>
+        </ul>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<section id="skills">
+  <div class="sec-label reveal">Skills</div>
+  <h2 class="sec-title reveal">What I work with</h2>
+  <p class="sec-intro reveal">The tools and disciplines I've relied on across sixteen years of shipping for the web.</p>
+  <div class="skill-groups">
+    <div class="skill-card reveal">
+      <h3>Front-End</h3>
+      <div class="chips">
+        <span class="chip hot">React</span><span class="chip hot">TypeScript</span><span class="chip hot">JavaScript</span>
+        <span class="chip">Angular</span><span class="chip">AngularJS</span><span class="chip">Vue.js</span>
+        <span class="chip">React Native</span><span class="chip">Redux</span><span class="chip">HTML5</span>
+        <span class="chip">CSS3</span><span class="chip">SASS</span><span class="chip">Responsive Design</span>
+      </div>
+    </div>
+    <div class="skill-card reveal">
+      <h3>Engineering</h3>
+      <div class="chips">
+        <span class="chip">Node.js</span><span class="chip">Python</span><span class="chip">PHP</span>
+        <span class="chip">MySQL</span><span class="chip">PostgreSQL</span><span class="chip">Docker</span>
+        <span class="chip">Apache Kafka</span><span class="chip">OpenSearch</span><span class="chip">Lucene / SOLR</span>
+        <span class="chip">Git</span><span class="chip">Jest</span><span class="chip">WordPress</span>
+      </div>
+    </div>
+    <div class="skill-card reveal">
+      <h3>Craft</h3>
+      <div class="chips">
+        <span class="chip hot">Accessibility (WCAG / ADA)</span><span class="chip hot">Design Systems</span>
+        <span class="chip">UI/UX Design</span><span class="chip">Front-End Architecture</span>
+        <span class="chip">AI Integration in UI</span><span class="chip">RAG Systems</span>
+        <span class="chip">Mentorship</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="alt" id="education">
+  <div class="wrap">
+    <div class="sec-label reveal">Education</div>
+    <h2 class="sec-title reveal">Schooling</h2>
+    <div class="edu-grid" style="margin-top: 28px;">
+      <div class="edu-card reveal">
+        <h3>California Polytechnic State University</h3>
+        <div class="deg">B.S. Computer Science</div>
+        <p>San Luis Obispo, CA · Emphasis in software development and database design</p>
+      </div>
+      <div class="edu-card reveal">
+        <h3>City College of San Francisco</h3>
+        <div class="deg">A.S. Computer Science</div>
+        <p>San Francisco, CA</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<section id="contact">
+  <div class="contact-box reveal">
+    <h2>Let's build something great.</h2>
+    <p>I'm open to conversations about front-end engineering, accessibility, design systems, and AI-powered interfaces — on-site, hybrid, or remote.</p>
+    <div class="contact-links">
+      <a href="mailto:raymondlsee@gmail.com">raymondlsee@gmail.com</a>
+      <a href="tel:+14154898977">(415) 489-8977</a>
+      <a href="https://www.linkedin.com/in/raymond-see-dev/" target="_blank" rel="noopener">LinkedIn ↗</a>
+    </div>
+  </div>
+</section>
+
+<footer>
+  © 2026 Raymond See · Belmont, California · Built with care, shipped with GitHub Pages
+</footer>
+
+<script>
+  // mobile nav
+  const btn = document.getElementById('menuBtn');
+  const links = document.getElementById('navLinks');
+  btn.addEventListener('click', () => links.classList.toggle('open'));
+  links.querySelectorAll('a').forEach(a => a.addEventListener('click', () => links.classList.remove('open')));
+
+  // scroll reveal
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); io.unobserve(e.target); } });
+  }, { threshold: 0.12 });
+  document.querySelectorAll('.reveal').forEach(el => io.observe(el));
+</script>
+</body>
+</html>
