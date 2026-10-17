@@ -156,6 +156,9 @@
   .edu-card h3 { font-family: var(--serif); font-size: 19px; margin-bottom: 4px; }
   .edu-card .deg { font-weight: 600; font-size: 15.5px; }
   .edu-card p { color: var(--ink-soft); font-size: 14.5px; margin-top: 6px; }
+  .game-card { display: block; text-decoration: none; color: inherit; transition: transform .2s ease, box-shadow .2s ease; }
+  .game-card:hover { transform: translateY(-3px); box-shadow: 0 12px 28px rgba(0,0,0,.10); }
+  .game-card .play { display: inline-block; margin-top: 10px; font-weight: 600; font-size: 14px; }
 
   /* ---------- contact ---------- */
   .contact-box {
@@ -197,6 +200,7 @@
       <a href="#experience">Experience</a>
       <a href="#skills">Skills</a>
       <a href="#education">Education</a>
+      <a href="#games">Games</a>
       <a href="#contact">Contact</a>
     </div>
     <button class="menu-btn" id="menuBtn" aria-label="Menu">☰</button>
@@ -417,6 +421,26 @@
     </div>
   </div>
 </div>
+
+<section id="games">
+  <div class="sec-label reveal">Playground</div>
+  <h2 class="sec-title reveal">Games</h2>
+  <p class="sec-intro reveal">A couple of browser games I put together — open one in a new tab and play a round.</p>
+  <div class="edu-grid" style="margin-top: 28px;">
+    <a class="edu-card reveal game-card" href="games/tic-tac-toe.html" target="_blank" rel="noopener">
+      <h3>Tic-Tac-Toe</h3>
+      <div class="deg">Classic 3×3 · Easy &amp; Smart computer, or two-player</div>
+      <p>Play against the computer at two difficulty levels, or challenge a friend. Built-in scoreboard and confetti for the win.</p>
+      <span class="play">Play →</span>
+    </a>
+    <a class="edu-card reveal game-card" href="games/sudoku.html" target="_blank" rel="noopener">
+      <h3>Sudoku</h3>
+      <div class="deg">Easy · Medium · Hard</div>
+      <p>Fresh puzzles every round, with pencil notes, undo, hints, a timer, and mistake tracking.</p>
+      <span class="play">Play →</span>
+    </a>
+  </div>
+</section>
 
 <section id="contact">
   <div class="contact-box reveal">
