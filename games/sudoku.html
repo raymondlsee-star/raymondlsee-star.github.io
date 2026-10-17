@@ -1,0 +1,754 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="color-scheme" content="light dark" />
+  <link rel="icon" href="data:," />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@500;600&family=Libre+Franklin:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <title>Sudoku</title>
+  <style>
+    :root {
+      color-scheme: light dark;
+      --page: #f3f5f2;
+      --paper: #ffffff;
+      --ink: #172026;
+      --muted: #59656d;
+      --line: #cbd2d3;
+      --line-strong: #26363d;
+      --accent: #d9593b;
+      --accent-ink: #ffffff;
+      --accent-soft: #f7ddd5;
+      --select: #d8edf0;
+      --peer: #edf5f5;
+      --same: #bce0e5;
+      --given: #172026;
+      --entry: #087a87;
+      --bad: #c13232;
+      --bad-soft: #fae2e1;
+      --shadow: 0 22px 55px rgba(24, 39, 45, .12);
+      --radius: 18px;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --page: #101619;
+        --paper: #192125;
+        --ink: #f1f4f2;
+        --muted: #a9b5b7;
+        --line: #39484d;
+        --line-strong: #c7d3d4;
+        --accent: #ed7658;
+        --accent-ink: #171d20;
+        --accent-soft: #512d27;
+        --select: #164b52;
+        --peer: #21353a;
+        --same: #245d66;
+        --given: #f1f4f2;
+        --entry: #72d0da;
+        --bad: #ff8b83;
+        --bad-soft: #4d2527;
+        --shadow: 0 24px 60px rgba(0, 0, 0, .3);
+      }
+    }
+    * { box-sizing: border-box; }
+    html { -webkit-text-size-adjust: 100%; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background:
+        linear-gradient(90deg, color-mix(in srgb, var(--ink) 3%, transparent) 1px, transparent 1px) 0 0 / 24px 24px,
+        linear-gradient(color-mix(in srgb, var(--ink) 3%, transparent) 1px, transparent 1px) 0 0 / 24px 24px,
+        var(--page);
+      color: var(--ink);
+      font-family: "Libre Franklin", sans-serif;
+    }
+    button, select { font: inherit; }
+    button { -webkit-tap-highlight-color: transparent; }
+    .app {
+      width: min(1080px, 100%);
+      margin: 0 auto;
+      padding: clamp(20px, 4vw, 48px) clamp(14px, 4vw, 40px) 42px;
+    }
+    .masthead {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 28px;
+      align-items: end;
+      border-bottom: 1px solid var(--line);
+      padding-bottom: 20px;
+      margin-bottom: 28px;
+    }
+    .masthead h1 {
+      font-size: clamp(28px, 4vw, 46px);
+      letter-spacing: -.045em;
+      line-height: 1.03;
+      margin: 0 0 8px;
+      max-width: 670px;
+    }
+    .masthead p { margin: 0; color: var(--muted); font-size: 15px; line-height: 1.5; }
+    .session-mark {
+      min-width: 110px;
+      text-align: right;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.45;
+    }
+    .session-mark strong { display: block; color: var(--ink); font: 600 24px/1 "IBM Plex Mono", monospace; }
+    .game-shell {
+      display: grid;
+      grid-template-columns: minmax(360px, 590px) minmax(230px, 300px);
+      gap: clamp(24px, 6vw, 70px);
+      align-items: start;
+      justify-content: center;
+    }
+    .game-column { min-width: 0; }
+    .game-bar {
+      display: grid;
+      grid-template-columns: 1fr auto 1fr;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 12px;
+      min-height: 36px;
+    }
+    .difficulty-wrap { display: flex; align-items: center; gap: 7px; }
+    .difficulty-wrap label { font-size: 12px; color: var(--muted); }
+    select {
+      border: 0;
+      border-bottom: 1px solid var(--line-strong);
+      background: transparent;
+      color: var(--ink);
+      font-weight: 600;
+      border-radius: 0;
+      padding: 5px 22px 5px 2px;
+      cursor: pointer;
+    }
+    .timer { font: 600 18px/1 "IBM Plex Mono", monospace; letter-spacing: .03em; }
+    .mistakes { justify-self: end; font-size: 12px; color: var(--muted); }
+    .mistakes b { color: var(--bad); font-family: "IBM Plex Mono", monospace; }
+    .board-wrap { position: relative; }
+    .board {
+      display: grid;
+      grid-template-columns: repeat(9, 1fr);
+      width: 100%;
+      aspect-ratio: 1;
+      background: var(--paper);
+      border: 2px solid var(--line-strong);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+    .cell {
+      position: relative;
+      border: 0;
+      border-right: 1px solid var(--line);
+      border-bottom: 1px solid var(--line);
+      background: var(--paper);
+      color: var(--given);
+      padding: 0;
+      cursor: pointer;
+      min-width: 0;
+      font: 600 clamp(20px, 4.7vw, 32px)/1 "IBM Plex Mono", monospace;
+    }
+    .cell:nth-child(3n) { border-right: 2px solid var(--line-strong); }
+    .cell:nth-child(9n) { border-right: 0; }
+    .cell:nth-child(n+19):nth-child(-n+27),
+    .cell:nth-child(n+46):nth-child(-n+54) { border-bottom: 2px solid var(--line-strong); }
+    .cell:nth-child(n+73) { border-bottom: 0; }
+    .cell.peer { background: var(--peer); }
+    .cell.same { background: var(--same); }
+    .cell.selected { background: var(--select); box-shadow: inset 0 0 0 3px var(--accent); z-index: 2; }
+    .cell.entry { color: var(--entry); }
+    .cell.wrong { color: var(--bad); background: var(--bad-soft); animation: nudge .22s ease; }
+    .cell:focus-visible { outline: 3px solid var(--accent); outline-offset: -4px; z-index: 3; }
+    .notes {
+      position: absolute;
+      inset: 3px;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      grid-template-rows: repeat(3, 1fr);
+      font: 500 clamp(7px, 1.45vw, 11px)/1 "IBM Plex Mono", monospace;
+      color: var(--entry);
+      pointer-events: none;
+    }
+    .notes span { display: grid; place-items: center; }
+    .pause-layer {
+      position: absolute;
+      inset: 0;
+      display: none;
+      place-items: center;
+      background: color-mix(in srgb, var(--paper) 94%, transparent);
+      z-index: 8;
+      border: 2px solid var(--line-strong);
+      text-align: center;
+      padding: 24px;
+    }
+    .pause-layer.show { display: grid; }
+    .pause-layer h2 { font-size: 27px; margin: 0 0 8px; letter-spacing: -.03em; }
+    .pause-layer p { color: var(--muted); margin: 0 0 18px; font-size: 14px; }
+    .side-panel {
+      padding-top: 48px;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+    .side-panel h2 { margin: 0; font-size: 17px; letter-spacing: -.02em; }
+    .progress-copy { display: flex; align-items: center; justify-content: space-between; color: var(--muted); font-size: 12px; margin-bottom: 8px; }
+    .progress-track { height: 5px; background: var(--line); overflow: hidden; border-radius: 5px; }
+    .progress-track span { display: block; width: 0; height: 100%; background: var(--accent); transition: width .2s ease; }
+    .number-pad {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 7px;
+    }
+    .number-btn {
+      border: 1px solid var(--line);
+      background: var(--paper);
+      color: var(--ink);
+      min-height: 56px;
+      border-radius: 10px;
+      cursor: pointer;
+      font: 600 22px/1 "IBM Plex Mono", monospace;
+      position: relative;
+    }
+    .number-btn:hover { border-color: var(--accent); }
+    .number-btn:focus-visible, .tool-btn:focus-visible, .primary:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+    .number-btn small { position: absolute; right: 6px; bottom: 5px; color: var(--muted); font: 500 9px/1 "IBM Plex Mono", monospace; }
+    .number-btn.complete { opacity: .35; pointer-events: none; }
+    .tools {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 7px;
+    }
+    .tool-btn, .primary {
+      min-height: 42px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 600;
+      border: 1px solid var(--line);
+      background: transparent;
+      color: var(--ink);
+    }
+    .tool-btn:hover { border-color: var(--ink); }
+    .tool-btn.active { background: var(--accent-soft); border-color: var(--accent); color: var(--accent); }
+    .tool-btn:disabled { opacity: .4; cursor: default; }
+    .primary { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); min-height: 48px; font-size: 14px; }
+    .primary:hover { filter: brightness(.95); }
+    .shortcut-note { color: var(--muted); font-size: 11px; line-height: 1.55; margin: 0; }
+    .shortcut-note kbd { font: 500 10px "IBM Plex Mono", monospace; border: 1px solid var(--line); background: var(--paper); border-radius: 3px; padding: 1px 4px; }
+    .message {
+      min-height: 20px;
+      margin: 11px 0 0;
+      font-size: 12px;
+      color: var(--muted);
+      text-align: center;
+    }
+    .message.bad { color: var(--bad); }
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      display: none;
+      place-items: center;
+      background: rgba(8, 15, 18, .56);
+      z-index: 20;
+      padding: 18px;
+    }
+    .modal-backdrop.show { display: grid; }
+    .modal {
+      width: min(410px, 100%);
+      background: var(--paper);
+      color: var(--ink);
+      border-top: 6px solid var(--accent);
+      box-shadow: 0 28px 80px rgba(0,0,0,.28);
+      padding: 30px;
+      text-align: center;
+    }
+    .modal .eyebrow { color: var(--accent); font-size: 12px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; }
+    .modal h2 { font-size: 30px; letter-spacing: -.04em; margin: 8px 0 10px; }
+    .modal p { margin: 0 0 22px; color: var(--muted); line-height: 1.55; font-size: 14px; }
+    .modal .primary { width: 100%; }
+    .confetti { position: fixed; z-index: 30; width: 8px; height: 14px; top: -20px; pointer-events: none; animation: fall 1.8s linear forwards; }
+    @keyframes nudge { 0%,100% { transform: translateX(0); } 40% { transform: translateX(-3px); } 70% { transform: translateX(3px); } }
+    @keyframes fall { to { transform: translate3d(var(--drift), 105vh, 0) rotate(540deg); opacity: .9; } }
+    @media (max-width: 760px) {
+      .app { padding-top: 18px; }
+      .masthead { align-items: start; margin-bottom: 20px; padding-bottom: 15px; }
+      .masthead h1 { font-size: 27px; max-width: 430px; }
+      .masthead p { font-size: 13px; }
+      .session-mark { display: none; }
+      .game-shell { grid-template-columns: minmax(0, 590px); gap: 15px; }
+      .side-panel { padding-top: 0; gap: 12px; }
+      .side-panel h2, .shortcut-note { display: none; }
+      .number-pad { grid-template-columns: repeat(9, 1fr); gap: 4px; order: 1; }
+      .number-btn { min-height: 44px; font-size: clamp(16px, 5vw, 23px); border-radius: 6px; }
+      .number-btn small { display: none; }
+      .tools { grid-template-columns: repeat(4, 1fr); order: 2; gap: 5px; }
+      .progress { order: 3; }
+      .primary { order: 4; }
+      .tool-btn { min-height: 40px; padding: 5px 2px; font-size: 11px; }
+      .cell { font-size: clamp(18px, 6vw, 30px); }
+      .notes { font-size: clamp(6px, 2.1vw, 10px); }
+    }
+    @media (max-width: 390px) {
+      .masthead h1 { font-size: 24px; }
+      .game-bar { grid-template-columns: auto 1fr auto; }
+      .difficulty-wrap label { display: none; }
+      select { max-width: 94px; }
+      .number-btn { min-height: 40px; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; }
+    }
+  </style>
+</head>
+<body>
+  <main class="app">
+    <header class="masthead">
+      <div>
+        <h1>A clean grid. Nine numbers. One solution.</h1>
+        <p>Fill every row, column, and 3×3 box without repeating a digit.</p>
+      </div>
+      <div class="session-mark"><strong id="wins">0</strong> solved this session</div>
+    </header>
+
+    <section class="game-shell" aria-label="Sudoku game">
+      <div class="game-column">
+        <div class="game-bar">
+          <div class="difficulty-wrap">
+            <label for="difficulty">Level</label>
+            <select id="difficulty" aria-label="Difficulty">
+              <option value="easy">Easy</option>
+              <option value="medium" selected>Medium</option>
+              <option value="hard">Hard</option>
+            </select>
+          </div>
+          <div class="timer" id="timer" aria-label="Elapsed time">00:00</div>
+          <div class="mistakes">Mistakes <b id="mistakes">0 / 3</b></div>
+        </div>
+
+        <div class="board-wrap">
+          <div id="board" class="board" role="grid" aria-label="Sudoku board"></div>
+          <div class="pause-layer" id="pauseLayer">
+            <div><h2>Game paused</h2><p>The grid is hidden. Your time is stopped.</p><button class="primary" id="resumeBtn">Resume game</button></div>
+          </div>
+        </div>
+        <p class="message" id="message" aria-live="polite">Choose a square, then enter a number.</p>
+      </div>
+
+      <aside class="side-panel" aria-label="Game controls">
+        <div class="progress">
+          <div class="progress-copy"><span>Grid progress</span><b id="progressText">0%</b></div>
+          <div class="progress-track" aria-hidden="true"><span id="progressBar"></span></div>
+        </div>
+        <h2>Number pad</h2>
+        <div class="number-pad" id="numberPad" aria-label="Number pad"></div>
+        <div class="tools">
+          <button class="tool-btn" id="undoBtn" type="button">Undo</button>
+          <button class="tool-btn" id="eraseBtn" type="button">Erase</button>
+          <button class="tool-btn" id="notesBtn" type="button" aria-pressed="false">Notes</button>
+          <button class="tool-btn" id="hintBtn" type="button">Hint · 3</button>
+          <button class="tool-btn" id="pauseBtn" type="button">Pause</button>
+          <button class="tool-btn" id="resetBtn" type="button">Restart</button>
+        </div>
+        <button class="primary" id="newGameBtn" type="button">New puzzle</button>
+        <p class="shortcut-note">Keyboard: <kbd>1</kbd>–<kbd>9</kbd> enter, <kbd>N</kbd> notes, arrows move, <kbd>⌫</kbd> erases.</p>
+      </aside>
+    </section>
+  </main>
+
+  <div class="modal-backdrop" id="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <div class="modal">
+      <div class="eyebrow" id="modalEyebrow">Puzzle complete</div>
+      <h2 id="modalTitle">Beautifully solved.</h2>
+      <p id="modalCopy"></p>
+      <button class="primary" id="modalBtn" type="button">Play another puzzle</button>
+    </div>
+  </div>
+
+  <script>
+    (function () {
+      "use strict";
+
+      var templates = {
+        easy: {
+          puzzle: "530070000600195000098000060800060003400803001700020006060000280000419005000080079",
+          solution: "534678912672195348198342567859761423426853791713924856961537284287419635345286179"
+        },
+        medium: {
+          puzzle: "000260701680070090190004500820100040004602900050003028009300074040050036703018000",
+          solution: "435269781682571493197834562826195347374682915951743628519326874248957136763418259"
+        },
+        hard: {
+          puzzle: "300000000005009000200504000020000700160000058704310600000890100000067080000005437",
+          solution: "391672845475189326286534971823956714169247358754318692637893142542761589918425437"
+        }
+      };
+
+      var boardEl = document.getElementById("board");
+      var difficultyEl = document.getElementById("difficulty");
+      var timerEl = document.getElementById("timer");
+      var mistakesEl = document.getElementById("mistakes");
+      var messageEl = document.getElementById("message");
+      var progressText = document.getElementById("progressText");
+      var progressBar = document.getElementById("progressBar");
+      var numberPad = document.getElementById("numberPad");
+      var notesBtn = document.getElementById("notesBtn");
+      var hintBtn = document.getElementById("hintBtn");
+      var undoBtn = document.getElementById("undoBtn");
+      var pauseLayer = document.getElementById("pauseLayer");
+      var pauseBtn = document.getElementById("pauseBtn");
+      var modal = document.getElementById("modal");
+      var modalCopy = document.getElementById("modalCopy");
+      var modalTitle = document.getElementById("modalTitle");
+      var modalEyebrow = document.getElementById("modalEyebrow");
+
+      var state = {};
+      var sessionWins = 0;
+      var timerId = null;
+      var variantSeed = 0;
+
+      function shuffled(arr) {
+        var copy = arr.slice();
+        for (var i = copy.length - 1; i > 0; i--) {
+          var j = Math.floor(Math.random() * (i + 1));
+          var t = copy[i]; copy[i] = copy[j]; copy[j] = t;
+        }
+        return copy;
+      }
+
+      function transformPair(puzzle, solution) {
+        var digitOrder = shuffled(["1","2","3","4","5","6","7","8","9"]);
+        var digitMap = {}; for (var d = 1; d <= 9; d++) digitMap[String(d)] = digitOrder[d-1];
+        var bandOrder = shuffled([0,1,2]);
+        var rowOrder = [];
+        bandOrder.forEach(function (b) { shuffled([0,1,2]).forEach(function (r) { rowOrder.push(b*3+r); }); });
+        var stackOrder = shuffled([0,1,2]);
+        var colOrder = [];
+        stackOrder.forEach(function (s) { shuffled([0,1,2]).forEach(function (c) { colOrder.push(s*3+c); }); });
+        var transpose = Math.random() > .5;
+
+        function apply(str) {
+          var out = "";
+          for (var r = 0; r < 9; r++) for (var c = 0; c < 9; c++) {
+            var sourceR = transpose ? rowOrder[c] : rowOrder[r];
+            var sourceC = transpose ? colOrder[r] : colOrder[c];
+            var value = str[sourceR * 9 + sourceC];
+            out += value === "0" ? "0" : digitMap[value];
+          }
+          return out;
+        }
+        return { puzzle: apply(puzzle), solution: apply(solution) };
+      }
+
+      function snapshot() {
+        return {
+          values: state.values.slice(),
+          notes: state.notes.map(function (n) { return n.slice(); }),
+          mistakes: state.mistakes,
+          hints: state.hints
+        };
+      }
+
+      function restore(snap) {
+        state.values = snap.values;
+        state.notes = snap.notes;
+        state.mistakes = snap.mistakes;
+        state.hints = snap.hints;
+        render();
+      }
+
+      function startGame() {
+        var level = difficultyEl.value;
+        var source = templates[level];
+        var pair = transformPair(source.puzzle, source.solution);
+        state = {
+          level: level,
+          puzzle: pair.puzzle.split(""),
+          solution: pair.solution.split(""),
+          values: pair.puzzle.split(""),
+          notes: Array.from({length: 81}, function () { return []; }),
+          selected: pair.puzzle.indexOf("0") >= 0 ? pair.puzzle.indexOf("0") : 0,
+          mistakes: 0,
+          hints: 3,
+          notesMode: false,
+          history: [],
+          seconds: 0,
+          paused: false,
+          finished: false,
+          flashWrong: -1
+        };
+        variantSeed++;
+        modal.classList.remove("show");
+        pauseLayer.classList.remove("show");
+        notesBtn.classList.remove("active");
+        notesBtn.setAttribute("aria-pressed", "false");
+        message("Choose a square, then enter a number.");
+        clearInterval(timerId);
+        timerId = setInterval(tick, 1000);
+        render();
+      }
+
+      function tick() {
+        if (!state.paused && !state.finished) {
+          state.seconds++;
+          timerEl.textContent = formatTime(state.seconds);
+        }
+      }
+
+      function formatTime(seconds) {
+        var mins = Math.floor(seconds / 60);
+        var secs = seconds % 60;
+        return String(mins).padStart(2,"0") + ":" + String(secs).padStart(2,"0");
+      }
+
+      function message(text, bad) {
+        messageEl.textContent = text;
+        messageEl.classList.toggle("bad", !!bad);
+      }
+
+      function isPeer(a, b) {
+        if (a < 0 || b < 0) return false;
+        var ar = Math.floor(a/9), ac = a%9, br = Math.floor(b/9), bc = b%9;
+        return ar === br || ac === bc || (Math.floor(ar/3) === Math.floor(br/3) && Math.floor(ac/3) === Math.floor(bc/3));
+      }
+
+      function render() {
+        boardEl.innerHTML = "";
+        var selectedValue = state.selected >= 0 ? state.values[state.selected] : "0";
+        state.values.forEach(function (value, i) {
+          var cell = document.createElement("button");
+          cell.type = "button";
+          cell.className = "cell";
+          cell.setAttribute("role", "gridcell");
+          cell.setAttribute("aria-label", cellLabel(i, value));
+          if (isPeer(state.selected, i) && i !== state.selected) cell.classList.add("peer");
+          if (selectedValue !== "0" && value === selectedValue) cell.classList.add("same");
+          if (i === state.selected) cell.classList.add("selected");
+          if (state.puzzle[i] === "0" && value !== "0") cell.classList.add("entry");
+          if (state.flashWrong === i) cell.classList.add("wrong");
+          if (value !== "0") {
+            cell.textContent = value;
+          } else if (state.notes[i].length) {
+            var notes = document.createElement("span"); notes.className = "notes";
+            for (var n = 1; n <= 9; n++) {
+              var note = document.createElement("span");
+              note.textContent = state.notes[i].indexOf(String(n)) >= 0 ? n : "";
+              notes.appendChild(note);
+            }
+            cell.appendChild(notes);
+          }
+          cell.addEventListener("click", function () { selectCell(i); });
+          boardEl.appendChild(cell);
+        });
+        updateControls();
+      }
+
+      function cellLabel(i, value) {
+        var base = "Row " + (Math.floor(i/9)+1) + ", column " + (i%9+1);
+        if (value !== "0") return base + ", " + value + (state.puzzle[i] !== "0" ? ", given" : "");
+        if (state.notes[i].length) return base + ", notes " + state.notes[i].join(", ");
+        return base + ", empty";
+      }
+
+      function selectCell(i) {
+        if (state.paused || state.finished) return;
+        state.selected = i;
+        state.flashWrong = -1;
+        render();
+      }
+
+      function updateControls() {
+        mistakesEl.textContent = state.mistakes + " / 3";
+        hintBtn.textContent = "Hint · " + state.hints;
+        hintBtn.disabled = state.hints <= 0 || state.finished;
+        undoBtn.disabled = state.history.length === 0;
+        timerEl.textContent = formatTime(state.seconds);
+        var givenCount = state.puzzle.filter(function (v) { return v !== "0"; }).length;
+        var filledCount = state.values.filter(function (v) { return v !== "0"; }).length;
+        var pct = Math.round(((filledCount - givenCount) / (81 - givenCount)) * 100);
+        progressText.textContent = pct + "%";
+        progressBar.style.width = pct + "%";
+        var counts = {};
+        state.values.forEach(function (v) { if (v !== "0") counts[v] = (counts[v] || 0) + 1; });
+        Array.prototype.forEach.call(numberPad.children, function (btn) {
+          var num = btn.getAttribute("data-num");
+          btn.classList.toggle("complete", counts[num] >= 9);
+          btn.querySelector("small").textContent = (counts[num] || 0) + "/9";
+        });
+      }
+
+      function enterNumber(num) {
+        if (state.paused || state.finished || state.selected < 0) return;
+        var i = state.selected;
+        if (state.puzzle[i] !== "0") {
+          message("That number is part of the puzzle and cannot be changed.");
+          return;
+        }
+        state.history.push(snapshot());
+        if (state.notesMode && state.values[i] === "0") {
+          var pos = state.notes[i].indexOf(num);
+          if (pos >= 0) state.notes[i].splice(pos, 1); else state.notes[i].push(num);
+          state.notes[i].sort();
+          message("Note " + num + (pos >= 0 ? " removed." : " added."));
+          render();
+          return;
+        }
+        if (num !== state.solution[i]) {
+          state.mistakes++;
+          state.flashWrong = i;
+          message("Not quite — " + num + " conflicts with the solution.", true);
+          render();
+          setTimeout(function () { state.flashWrong = -1; render(); }, 500);
+          if (state.mistakes >= 3) endGame(false);
+          return;
+        }
+        state.values[i] = num;
+        state.notes[i] = [];
+        state.flashWrong = -1;
+        clearPeerNotes(i, num);
+        message("Good move.");
+        render();
+        if (state.values.indexOf("0") < 0) endGame(true);
+      }
+
+      function clearPeerNotes(index, num) {
+        state.notes.forEach(function (list, i) {
+          if (isPeer(index, i)) {
+            var pos = list.indexOf(num);
+            if (pos >= 0) list.splice(pos, 1);
+          }
+        });
+      }
+
+      function erase() {
+        if (state.paused || state.finished || state.selected < 0 || state.puzzle[state.selected] !== "0") return;
+        if (state.values[state.selected] === "0" && !state.notes[state.selected].length) return;
+        state.history.push(snapshot());
+        state.values[state.selected] = "0";
+        state.notes[state.selected] = [];
+        message("Square cleared.");
+        render();
+      }
+
+      function hint() {
+        if (state.hints <= 0 || state.paused || state.finished) return;
+        var i = state.selected;
+        if (i < 0 || state.puzzle[i] !== "0" || state.values[i] !== "0") {
+          i = state.values.findIndex(function (v, idx) { return v === "0" && state.puzzle[idx] === "0"; });
+        }
+        if (i < 0) return;
+        state.history.push(snapshot());
+        state.selected = i;
+        state.values[i] = state.solution[i];
+        state.notes[i] = [];
+        state.hints--;
+        clearPeerNotes(i, state.solution[i]);
+        message("Hint placed: " + state.solution[i] + ".");
+        render();
+        if (state.values.indexOf("0") < 0) endGame(true);
+      }
+
+      function endGame(won) {
+        state.finished = true;
+        clearInterval(timerId);
+        if (won) {
+          sessionWins++;
+          document.getElementById("wins").textContent = sessionWins;
+          modalEyebrow.textContent = "Puzzle complete";
+          modalTitle.textContent = "Beautifully solved.";
+          modalCopy.textContent = capitalize(state.level) + " grid completed in " + formatTime(state.seconds) + " with " + state.mistakes + (state.mistakes === 1 ? " mistake." : " mistakes.");
+          celebrate();
+        } else {
+          modalEyebrow.textContent = "Three mistakes";
+          modalTitle.textContent = "Give the grid another look.";
+          modalCopy.textContent = "This round is over, but every wrong turn reveals something useful. Start a fresh puzzle when you’re ready.";
+        }
+        modal.classList.add("show");
+      }
+
+      function capitalize(s) { return s.charAt(0).toUpperCase() + s.slice(1); }
+
+      function celebrate() {
+        var colors = ["#d9593b", "#e4af32", "#087a87", "#f1f4f2"];
+        for (var i = 0; i < 45; i++) {
+          var bit = document.createElement("span");
+          bit.className = "confetti";
+          bit.style.left = Math.random() * 100 + "vw";
+          bit.style.background = colors[i % colors.length];
+          bit.style.setProperty("--drift", (Math.random() * 160 - 80) + "px");
+          bit.style.animationDelay = Math.random() * .5 + "s";
+          document.body.appendChild(bit);
+          setTimeout((function (el) { return function () { el.remove(); }; })(bit), 2500);
+        }
+      }
+
+      function togglePause(forceResume) {
+        if (state.finished) return;
+        state.paused = forceResume ? false : !state.paused;
+        pauseLayer.classList.toggle("show", state.paused);
+        pauseBtn.textContent = state.paused ? "Resume" : "Pause";
+        if (!state.paused) boardEl.querySelectorAll(".cell")[state.selected].focus();
+      }
+
+      for (var n = 1; n <= 9; n++) {
+        var btn = document.createElement("button");
+        btn.type = "button"; btn.className = "number-btn"; btn.setAttribute("data-num", String(n));
+        btn.setAttribute("aria-label", "Enter " + n);
+        btn.innerHTML = n + "<small>0/9</small>";
+        (function (value) { btn.addEventListener("click", function () { enterNumber(value); }); })(String(n));
+        numberPad.appendChild(btn);
+      }
+
+      difficultyEl.addEventListener("change", startGame);
+      document.getElementById("newGameBtn").addEventListener("click", startGame);
+      document.getElementById("resetBtn").addEventListener("click", function () {
+        var level = state.level;
+        state.values = state.puzzle.slice();
+        state.notes = Array.from({length:81}, function () { return []; });
+        state.selected = state.puzzle.indexOf("0");
+        state.mistakes = 0; state.hints = 3; state.history = []; state.seconds = 0; state.finished = false;
+        clearInterval(timerId); timerId = setInterval(tick, 1000);
+        message("Puzzle restarted."); render();
+      });
+      document.getElementById("eraseBtn").addEventListener("click", erase);
+      hintBtn.addEventListener("click", hint);
+      undoBtn.addEventListener("click", function () {
+        if (!state.history.length || state.paused || state.finished) return;
+        restore(state.history.pop()); message("Last move undone.");
+      });
+      notesBtn.addEventListener("click", function () {
+        state.notesMode = !state.notesMode;
+        notesBtn.classList.toggle("active", state.notesMode);
+        notesBtn.setAttribute("aria-pressed", String(state.notesMode));
+        message(state.notesMode ? "Notes mode is on." : "Notes mode is off.");
+      });
+      pauseBtn.addEventListener("click", function () { togglePause(false); });
+      document.getElementById("resumeBtn").addEventListener("click", function () { togglePause(true); });
+      document.getElementById("modalBtn").addEventListener("click", startGame);
+
+      document.addEventListener("keydown", function (e) {
+        if (modal.classList.contains("show")) {
+          if (e.key === "Enter" || e.key === " ") { e.preventDefault(); startGame(); }
+          return;
+        }
+        if (e.key.toLowerCase() === "p") { togglePause(false); return; }
+        if (state.paused || state.finished) return;
+        if (/^[1-9]$/.test(e.key)) { enterNumber(e.key); return; }
+        if (e.key.toLowerCase() === "n") { notesBtn.click(); return; }
+        if (e.key === "Backspace" || e.key === "Delete" || e.key === "0") { e.preventDefault(); erase(); return; }
+        var row = Math.floor(state.selected/9), col = state.selected%9;
+        if (e.key === "ArrowUp") row = (row+8)%9;
+        else if (e.key === "ArrowDown") row = (row+1)%9;
+        else if (e.key === "ArrowLeft") col = (col+8)%9;
+        else if (e.key === "ArrowRight") col = (col+1)%9;
+        else return;
+        e.preventDefault(); selectCell(row*9+col);
+        boardEl.querySelectorAll(".cell")[state.selected].focus();
+      });
+
+      startGame();
+    })();
+  </script>
+</body>
+</html>
