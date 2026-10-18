@@ -1,0 +1,632 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="color-scheme" content="light dark" />
+    <link rel="icon" href="data:," />
+    <title>Ultimate Tic-Tac-Toe</title>
+    <style>
+      :root {
+        --bg: #f4f1ea;
+        --surface: #fffdf8;
+        --ink: #23201b;
+        --ink-soft: #6b655c;
+        --line: #d8d2c6;
+        --line-strong: #b9b1a0;
+        --x: #c2492f;
+        --x-soft: rgba(194, 73, 47, 0.12);
+        --o: #1f6f6b;
+        --o-soft: rgba(31, 111, 107, 0.12);
+        --active: #e9b44c;
+        --active-bg: rgba(233, 180, 76, 0.16);
+        --accent: #23201b;
+        --accent-ink: #fffdf8;
+        --radius: 14px;
+      }
+      @media (prefers-color-scheme: dark) {
+        :root {
+          --bg: #171512;
+          --surface: #211e1a;
+          --ink: #f0eadf;
+          --ink-soft: #a89f92;
+          --line: #3d382f;
+          --line-strong: #5a5347;
+          --x: #e8705a;
+          --x-soft: rgba(232, 112, 90, 0.16);
+          --o: #4fb3ad;
+          --o-soft: rgba(79, 179, 173, 0.16);
+          --active: #e9b44c;
+          --active-bg: rgba(233, 180, 76, 0.14);
+          --accent: #f0eadf;
+          --accent-ink: #171512;
+        }
+      }
+      * { box-sizing: border-box; }
+      html, body { margin: 0; }
+      body {
+        background: var(--bg);
+        color: var(--ink);
+        font-family: "Avenir Next", "Segoe UI", system-ui, -apple-system, sans-serif;
+        min-height: 100vh;
+        display: flex;
+        justify-content: center;
+        padding: 20px 14px 40px;
+      }
+      .wrap { width: 100%; max-width: 620px; }
+      header { text-align: center; margin-bottom: 6px; }
+      h1 {
+        font-family: Georgia, "Times New Roman", serif;
+        font-size: clamp(28px, 6vw, 40px);
+        font-weight: 700;
+        margin: 8px 0 4px;
+        letter-spacing: 0.01em;
+      }
+      .tagline { color: var(--ink-soft); font-size: 15px; margin: 0 0 14px; }
+
+      .controls {
+        display: flex; flex-wrap: wrap; gap: 8px; justify-content: center;
+        margin-bottom: 14px;
+      }
+      .seg {
+        display: inline-flex; background: var(--surface);
+        border: 1px solid var(--line); border-radius: 999px; padding: 3px;
+      }
+      .seg button {
+        border: 0; background: transparent; color: var(--ink-soft);
+        font: inherit; font-size: 14px; font-weight: 600;
+        padding: 7px 14px; border-radius: 999px; cursor: pointer;
+      }
+      .seg button[aria-pressed="true"] { background: var(--accent); color: var(--accent-ink); }
+      .seg button:focus-visible, .cell:focus-visible, .btn:focus-visible {
+        outline: 2px solid var(--active); outline-offset: 2px;
+      }
+      .btn {
+        border: 1px solid var(--line); background: var(--surface); color: var(--ink);
+        font: inherit; font-size: 14px; font-weight: 600;
+        padding: 10px 18px; border-radius: 999px; cursor: pointer;
+      }
+      .btn.primary { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+      .btn:active { transform: scale(0.97); }
+
+      .status {
+        text-align: center; font-size: 17px; font-weight: 600;
+        min-height: 26px; margin: 4px 0 12px;
+      }
+      .status .mark-x { color: var(--x); }
+      .status .mark-o { color: var(--o); }
+
+      .scoreboard {
+        display: flex; gap: 10px; justify-content: center; margin-bottom: 16px;
+      }
+      .score {
+        background: var(--surface); border: 1px solid var(--line);
+        border-radius: var(--radius); padding: 8px 16px; text-align: center;
+        min-width: 92px;
+      }
+      .score .who { font-size: 12px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--ink-soft); }
+      .score .num { font-size: 24px; font-weight: 700; font-variant-numeric: tabular-nums; }
+      .score.x .num { color: var(--x); }
+      .score.o .num { color: var(--o); }
+
+      /* Big board */
+      .bigboard {
+        display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px;
+        background: var(--surface); border: 1px solid var(--line);
+        border-radius: 20px; padding: 12px;
+        position: relative;
+      }
+      .mini {
+        position: relative;
+        display: grid; grid-template-columns: repeat(3, 1fr); gap: 3px;
+        padding: 6px; border-radius: 12px;
+        border: 2px solid var(--line);
+        transition: border-color 0.2s, background 0.2s;
+      }
+      .mini.active { border-color: var(--active); background: var(--active-bg); }
+      .mini.won-x { background: var(--x-soft); border-color: transparent; }
+      .mini.won-o { background: var(--o-soft); border-color: transparent; }
+      .mini .big-mark {
+        position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+        font-size: clamp(44px, 13vw, 84px); font-weight: 800; pointer-events: none;
+        font-family: "Avenir Next", "Segoe UI", system-ui, sans-serif;
+      }
+      .mini.won-x .big-mark { color: var(--x); }
+      .mini.won-o .big-mark { color: var(--o); }
+      .mini.drawn { opacity: 0.55; }
+
+      .cell {
+        aspect-ratio: 1; border: 0; border-radius: 7px;
+        background: var(--bg);
+        font: inherit; font-size: clamp(15px, 4.2vw, 24px); font-weight: 700;
+        color: var(--ink); cursor: pointer; padding: 0;
+        display: flex; align-items: center; justify-content: center;
+        transition: background 0.15s, transform 0.1s;
+      }
+      .cell:disabled { cursor: default; }
+      .cell.playable:hover { background: var(--active-bg); }
+      .cell.playable:active { transform: scale(0.93); }
+      .cell.x { color: var(--x); }
+      .cell.o { color: var(--o); }
+      .cell.pop { animation: pop 0.22s ease; }
+      @keyframes pop { 0% { transform: scale(0.4); } 60% { transform: scale(1.15); } 100% { transform: scale(1); } }
+      .cell.win-cell { background: var(--active-bg); }
+
+      .bigboard .win-line {
+        position: absolute; pointer-events: none;
+        background: var(--active); border-radius: 99px; opacity: 0.85;
+        transform-origin: left center;
+      }
+
+      .actions { display: flex; gap: 10px; justify-content: center; margin-top: 18px; }
+
+      details.howto {
+        margin-top: 22px; background: var(--surface); border: 1px solid var(--line);
+        border-radius: var(--radius); padding: 14px 18px;
+      }
+      details.howto summary { font-weight: 700; cursor: pointer; font-size: 15px; }
+      details.howto ul { margin: 10px 0 4px; padding-left: 20px; color: var(--ink-soft); font-size: 14.5px; line-height: 1.55; }
+      details.howto li { margin-bottom: 4px; }
+
+      .confetti-piece {
+        position: fixed; top: -12px; z-index: 50; pointer-events: none;
+        border-radius: 2px;
+        animation: fall linear forwards;
+      }
+      @keyframes fall {
+        to { transform: translateY(105vh) rotate(720deg); opacity: 0.9; }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        .cell.pop { animation: none; }
+        .confetti-piece { display: none; }
+      }
+      @media (max-width: 420px) {
+        .bigboard { gap: 7px; padding: 9px; }
+        .mini { padding: 4px; gap: 2px; }
+        .score { min-width: 78px; padding: 6px 10px; }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <header>
+        <h1>Ultimate Tic-Tac-Toe</h1>
+        <p class="tagline">Nine little boards, one big win. Where you play sends your opponent to their next board.</p>
+      </header>
+
+      <div class="controls" role="group" aria-label="Game mode">
+        <div class="seg" id="modeSeg">
+          <button type="button" data-mode="cpu" aria-pressed="true">Vs Computer</button>
+          <button type="button" data-mode="2p" aria-pressed="false">Two Players</button>
+        </div>
+        <div class="seg" id="diffSeg">
+          <button type="button" data-diff="easy" aria-pressed="false">Easy</button>
+          <button type="button" data-diff="smart" aria-pressed="true">Smart</button>
+        </div>
+      </div>
+
+      <p class="status" id="status" aria-live="polite"></p>
+
+      <div class="scoreboard">
+        <div class="score x"><div class="who">X wins</div><div class="num" id="scoreX">0</div></div>
+        <div class="score"><div class="who">Draws</div><div class="num" id="scoreD">0</div></div>
+        <div class="score o"><div class="who">O wins</div><div class="num" id="scoreO">0</div></div>
+      </div>
+
+      <div class="bigboard" id="bigboard" aria-label="Ultimate tic-tac-toe board"></div>
+
+      <div class="actions">
+        <button type="button" class="btn primary" id="newGameBtn">New game</button>
+        <button type="button" class="btn" id="resetScoreBtn">Reset scores</button>
+      </div>
+
+      <details class="howto">
+        <summary>How to play</summary>
+        <ul>
+          <li>The board is a 3×3 grid of small tic-tac-toe boards. Win a small board by getting three in a row inside it.</li>
+          <li>The square you play in decides which small board your opponent must play in next — play the top-right square, and they play in the top-right board.</li>
+          <li>If that board is already won or full, your opponent gets a free move and can play anywhere.</li>
+          <li>Win three small boards in a row — across, down, or diagonally — to win the game.</li>
+          <li>The board you must play in glows gold. X always goes first.</li>
+        </ul>
+      </details>
+    </div>
+
+    <script>
+      (function () {
+        "use strict";
+
+        var LINES = [
+          [0, 1, 2], [3, 4, 5], [6, 7, 8],
+          [0, 3, 6], [1, 4, 7], [2, 5, 8],
+          [0, 4, 8], [2, 4, 6]
+        ];
+
+        var bigboardEl = document.getElementById("bigboard");
+        var statusEl = document.getElementById("status");
+        var scoreXEl = document.getElementById("scoreX");
+        var scoreOEl = document.getElementById("scoreO");
+        var scoreDEl = document.getElementById("scoreD");
+        var diffSeg = document.getElementById("diffSeg");
+
+        var mode = "cpu";        // "cpu" | "2p"
+        var difficulty = "smart";
+        var scores = { X: 0, O: 0, D: 0 };
+
+        // Game state
+        var cells;        // cells[b][c] = "" | "X" | "O"  (b = mini board, c = cell in it)
+        var miniWinner;   // miniWinner[b] = "" | "X" | "O" | "D" (drawn/full)
+        var turn;         // "X" | "O"
+        var activeBoard;  // -1 = free move, else mini board index the player must use
+        var gameOver;
+        var bigWinLine;   // winning line of mini boards, or null
+
+        var miniEls = [];
+        var cellEls = [];
+
+        function buildBoard() {
+          bigboardEl.innerHTML = "";
+          miniEls = [];
+          cellEls = [];
+          for (var b = 0; b < 9; b++) {
+            var mini = document.createElement("div");
+            mini.className = "mini";
+            mini.setAttribute("role", "group");
+            mini.setAttribute("aria-label", "Small board " + (b + 1));
+            var row = [];
+            for (var c = 0; c < 9; c++) {
+              var btn = document.createElement("button");
+              btn.type = "button";
+              btn.className = "cell";
+              btn.dataset.board = b;
+              btn.dataset.cell = c;
+              btn.setAttribute("aria-label", "Board " + (b + 1) + ", square " + (c + 1));
+              btn.addEventListener("click", onCellClick);
+              mini.appendChild(btn);
+              row.push(btn);
+            }
+            bigboardEl.appendChild(mini);
+            miniEls.push(mini);
+            cellEls.push(row);
+          }
+        }
+
+        function lineWinner(nine) {
+          for (var i = 0; i < LINES.length; i++) {
+            var L = LINES[i];
+            var v = nine[L[0]];
+            if (v && v === nine[L[1]] && v === nine[L[2]]) {
+              return { winner: v, line: L };
+            }
+          }
+          return null;
+        }
+
+        function newGame() {
+          cells = [];
+          miniWinner = [];
+          for (var b = 0; b < 9; b++) {
+            cells.push(["", "", "", "", "", "", "", "", ""]);
+            miniWinner.push("");
+          }
+          turn = "X";
+          activeBoard = -1;
+          gameOver = false;
+          bigWinLine = null;
+          var old = bigboardEl.querySelector(".win-line");
+          if (old) old.remove();
+          render();
+        }
+
+        function legalMoves() {
+          var moves = [];
+          var boards = activeBoard === -1 ? [0, 1, 2, 3, 4, 5, 6, 7, 8] : [activeBoard];
+          for (var i = 0; i < boards.length; i++) {
+            var b = boards[i];
+            if (miniWinner[b]) continue;
+            for (var c = 0; c < 9; c++) {
+              if (!cells[b][c]) moves.push({ b: b, c: c });
+            }
+          }
+          return moves;
+        }
+
+        function applyMove(b, c) {
+          cells[b][c] = turn;
+          var res = lineWinner(cells[b]);
+          if (res) {
+            miniWinner[b] = res.winner;
+          } else if (cells[b].every(function (v) { return v; })) {
+            miniWinner[b] = "D";
+          }
+          // Next active board = the cell index just played, unless finished
+          activeBoard = miniWinner[c] ? -1 : c;
+          // Does this win the whole game?
+          var big = lineWinner(miniWinner.map(function (w) { return w === "D" ? "" : w; }));
+          if (big) {
+            gameOver = true;
+            bigWinLine = big.line;
+            scores[big.winner]++;
+          } else if (miniWinner.every(function (w) { return w; })) {
+            gameOver = true;
+            scores.D++;
+          }
+          turn = turn === "X" ? "O" : "X";
+        }
+
+        function isCpuTurn() {
+          return mode === "cpu" && turn === "O" && !gameOver;
+        }
+
+        function onCellClick(e) {
+          if (gameOver || isCpuTurn()) return;
+          var b = +e.currentTarget.dataset.board;
+          var c = +e.currentTarget.dataset.cell;
+          if (cells[b][c] || miniWinner[b]) return;
+          if (activeBoard !== -1 && b !== activeBoard) return;
+          doMove(b, c);
+        }
+
+        function doMove(b, c) {
+          applyMove(b, c);
+          render(b, c);
+          if (gameOver) {
+            updateScores();
+            if (bigWinLine) confetti();
+          } else if (isCpuTurn()) {
+            setTimeout(function () {
+              var mv = pickCpuMove();
+              if (mv) doMove(mv.b, mv.c);
+            }, 420);
+          }
+        }
+
+        // ---------- CPU ----------
+        function pickCpuMove() {
+          var moves = legalMoves();
+          if (!moves.length) return null;
+          if (difficulty === "easy") {
+            return moves[Math.floor(Math.random() * moves.length)];
+          }
+          var best = null, bestScore = -Infinity;
+          for (var i = 0; i < moves.length; i++) {
+            var s = scoreMove(moves[i].b, moves[i].c, "O") + Math.random() * 0.6;
+            if (s > bestScore) { bestScore = s; best = moves[i]; }
+          }
+          return best;
+        }
+
+        // Heuristic score for `player` playing at (b, c) in the CURRENT position.
+        function scoreMove(b, c, player) {
+          var foe = player === "X" ? "O" : "X";
+          var s = 0;
+          // Simulate on copies
+          var simCells = cells[b].slice();
+          simCells[c] = player;
+          var winsMini = !!lineWinner(simCells);
+          if (winsMini) {
+            s += 30;
+            var simMini = miniWinner.slice();
+            simMini[b] = player;
+            if (lineWinner(simMini.map(function (w) { return w === "D" ? "" : w; }))) s += 1000; // wins the game
+            // progress toward a big line
+            s += bigLineProgress(simMini, player) * 6;
+          }
+          // Two-in-a-row setup inside the mini board
+          s += twoInRow(simCells, player) * 4;
+          if (c === 4) s += 2.5;          // center of mini board
+          if (b === 4) s += 1.5;          // playing in center board
+          if (c === b) s += 0.5;
+          // Block opponent's mini-board win
+          var foeCells = cells[b].slice();
+          foeCells[c] = foe;
+          // (if opponent already had two + empty here, our occupying it blocks)
+          var before = twoInRow(cells[b], foe);
+          var afterCells = cells[b].slice();
+          afterCells[c] = player;
+          if (before > 0 && twoInRow(afterCells, foe) < before) s += 14;
+          // Where does this send the opponent?
+          var target = c;
+          if (miniWinner[target] || (target === b && winsMini)) {
+            s -= 8; // gives opponent a free move — bad
+          } else if (!miniWinner[target]) {
+            // If opponent could win that board on their move, avoid sending them there
+            var tCells = target === b ? simCells : cells[target];
+            if (canWinInOne(tCells, foe)) s -= 18;
+            // Sending them to a board where they have two-in-a-row brewing is mildly bad
+            s -= twoInRow(tCells, foe) * 1.2;
+            // Prefer sending them somewhere they have nothing
+            if (tCells.every(function (v) { return !v; })) s += 2;
+          }
+          return s;
+        }
+
+        function twoInRow(nine, player) {
+          var n = 0;
+          for (var i = 0; i < LINES.length; i++) {
+            var L = LINES[i];
+            var mine = 0, empty = 0, foe = 0;
+            for (var j = 0; j < 3; j++) {
+              var v = nine[L[j]];
+              if (v === player) mine++;
+              else if (!v) empty++;
+              else foe++;
+            }
+            if (mine === 2 && empty === 1) n++;
+          }
+          return n;
+        }
+
+        function canWinInOne(nine, player) {
+          for (var c = 0; c < 9; c++) {
+            if (!nine[c]) {
+              var copy = nine.slice();
+              copy[c] = player;
+              if (lineWinner(copy)) return true;
+            }
+          }
+          return false;
+        }
+
+        function bigLineProgress(miniArr, player) {
+          var best = 0;
+          for (var i = 0; i < LINES.length; i++) {
+            var L = LINES[i];
+            var mine = 0, blocked = false;
+            for (var j = 0; j < 3; j++) {
+              var w = miniArr[L[j]];
+              if (w === player) mine++;
+              else if (w && w !== "D") blocked = true;
+            }
+            if (!blocked && mine > best) best = mine;
+          }
+          return best;
+        }
+
+        // ---------- Rendering ----------
+        function render(lastB, lastC) {
+          for (var b = 0; b < 9; b++) {
+            var mini = miniEls[b];
+            mini.classList.toggle("active", !gameOver && activeBoard === b && !miniWinner[b]);
+            mini.classList.toggle("won-x", miniWinner[b] === "X");
+            mini.classList.toggle("won-o", miniWinner[b] === "O");
+            mini.classList.toggle("drawn", miniWinner[b] === "D");
+            var mark = mini.querySelector(".big-mark");
+            if (miniWinner[b] === "X" || miniWinner[b] === "O") {
+              if (!mark) {
+                mark = document.createElement("div");
+                mark.className = "big-mark";
+                mini.appendChild(mark);
+              }
+              mark.textContent = miniWinner[b];
+            } else if (mark) {
+              mark.remove();
+            }
+            for (var c = 0; c < 9; c++) {
+              var el = cellEls[b][c];
+              var v = cells[b][c];
+              el.textContent = v;
+              el.className = "cell" + (v ? " " + v.toLowerCase() : "");
+              var playable = !gameOver && !v && !miniWinner[b] &&
+                (activeBoard === -1 || activeBoard === b) && !isCpuTurn();
+              el.disabled = !playable;
+              if (playable) el.classList.add("playable");
+              if (b === lastB && c === lastC) el.classList.add("pop");
+            }
+          }
+          if (bigWinLine) drawWinLine();
+          updateStatus();
+        }
+
+        function drawWinLine() {
+          var old = bigboardEl.querySelector(".win-line");
+          if (old) old.remove();
+          var line = document.createElement("div");
+          line.className = "win-line";
+          var a = miniEls[bigWinLine[0]].getBoundingClientRect();
+          var cRect = miniEls[bigWinLine[2]].getBoundingClientRect();
+          var board = bigboardEl.getBoundingClientRect();
+          var x1 = a.left + a.width / 2 - board.left;
+          var y1 = a.top + a.height / 2 - board.top;
+          var x2 = cRect.left + cRect.width / 2 - board.left;
+          var y2 = cRect.top + cRect.height / 2 - board.top;
+          var len = Math.hypot(x2 - x1, y2 - y1);
+          var ang = Math.atan2(y2 - y1, x2 - x1);
+          line.style.left = x1 + "px";
+          line.style.top = y1 + "px";
+          line.style.width = len + "px";
+          line.style.height = "6px";
+          line.style.transform = "translateY(-3px) rotate(" + ang + "rad)";
+          bigboardEl.appendChild(line);
+        }
+
+        function updateStatus() {
+          if (gameOver) {
+            if (bigWinLine) {
+              var winner = turn === "X" ? "O" : "X";
+              var isCpuWin = mode === "cpu" && winner === "O";
+              var isPlayerWin = mode === "cpu" && winner === "X";
+              var label = isCpuWin ? "The computer wins the game!" :
+                isPlayerWin ? "You win the game! 🎉" :
+                winner + " wins the game!";
+              statusEl.innerHTML = label;
+            } else {
+              statusEl.textContent = "It's a draw — every board is settled.";
+            }
+            return;
+          }
+          if (isCpuTurn()) {
+            statusEl.innerHTML = 'Computer (<span class="mark-o">O</span>) is thinking…';
+            return;
+          }
+          var who = turn === "X"
+            ? '<span class="mark-x">X</span>'
+            : '<span class="mark-o">O</span>';
+          var where = activeBoard === -1 ? " — free move, play anywhere" : "";
+          var me = mode === "cpu" && turn === "X" ? "Your turn, " : "";
+          statusEl.innerHTML = me + who + " to move" + where;
+        }
+
+        function updateScores() {
+          scoreXEl.textContent = scores.X;
+          scoreOEl.textContent = scores.O;
+          scoreDEl.textContent = scores.D;
+        }
+
+        // ---------- Confetti ----------
+        function confetti() {
+          if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+          var colors = ["#c2492f", "#1f6f6b", "#e9b44c", "#f0eadf"];
+          for (var i = 0; i < 70; i++) {
+            var p = document.createElement("div");
+            p.className = "confetti-piece";
+            var size = 6 + Math.random() * 7;
+            p.style.left = Math.random() * 100 + "vw";
+            p.style.width = size + "px";
+            p.style.height = size * (Math.random() > 0.5 ? 1 : 0.4) + "px";
+            p.style.background = colors[i % colors.length];
+            p.style.animationDuration = 1.8 + Math.random() * 1.6 + "s";
+            p.style.animationDelay = Math.random() * 0.4 + "s";
+            document.body.appendChild(p);
+            (function (el) { setTimeout(function () { el.remove(); }, 4200); })(p);
+          }
+        }
+
+        // ---------- Controls ----------
+        document.getElementById("modeSeg").addEventListener("click", function (e) {
+          var btn = e.target.closest("button");
+          if (!btn) return;
+          mode = btn.dataset.mode;
+          this.querySelectorAll("button").forEach(function (b) {
+            b.setAttribute("aria-pressed", b === btn ? "true" : "false");
+          });
+          diffSeg.style.display = mode === "cpu" ? "" : "none";
+          newGame();
+        });
+
+        diffSeg.addEventListener("click", function (e) {
+          var btn = e.target.closest("button");
+          if (!btn) return;
+          difficulty = btn.dataset.diff;
+          this.querySelectorAll("button").forEach(function (b) {
+            b.setAttribute("aria-pressed", b === btn ? "true" : "false");
+          });
+        });
+
+        document.getElementById("newGameBtn").addEventListener("click", newGame);
+        document.getElementById("resetScoreBtn").addEventListener("click", function () {
+          scores = { X: 0, O: 0, D: 0 };
+          updateScores();
+        });
+
+        window.addEventListener("resize", function () {
+          var old = bigboardEl.querySelector(".win-line");
+          if (old && bigWinLine) drawWinLine();
+        });
+
+        buildBoard();
+        newGame();
+      })();
+    </script>
+  </body>
+</html>
