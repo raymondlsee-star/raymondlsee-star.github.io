@@ -159,6 +159,7 @@
   .game-card { display: block; text-decoration: none; color: inherit; transition: transform .2s ease, box-shadow .2s ease; }
   .game-card:hover { transform: translateY(-3px); box-shadow: 0 12px 28px rgba(0,0,0,.10); }
   .game-card .play { display: inline-block; margin-top: 10px; font-weight: 600; font-size: 14px; }
+  .game-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 22px; }
 
   /* ---------- contact ---------- */
   .contact-box {
@@ -425,8 +426,8 @@
 <section id="games">
   <div class="sec-label reveal">Playground</div>
   <h2 class="sec-title reveal">Games</h2>
-  <p class="sec-intro reveal">A couple of browser games I put together — open one in a new tab and play a round.</p>
-  <div class="edu-grid" style="margin-top: 28px;">
+  <p class="sec-intro reveal">A few browser games I put together — open one in a new tab and play a round.</p>
+  <div class="game-grid" style="margin-top: 28px;">
     <a class="edu-card reveal game-card" href="games/tic-tac-toe.html" target="_blank" rel="noopener">
       <h3>Tic-Tac-Toe</h3>
       <div class="deg">Classic 3×3 · Easy &amp; Smart computer, or two-player</div>
@@ -437,6 +438,12 @@
       <h3>Sudoku</h3>
       <div class="deg">Easy · Medium · Hard</div>
       <p>Fresh puzzles every round, with pencil notes, undo, hints, a timer, and mistake tracking.</p>
+      <span class="play">Play →</span>
+    </a>
+    <a class="edu-card reveal game-card" href="games/ultimate-tic-tac-toe.html" target="_blank" rel="noopener">
+      <h3>Ultimate Tic-Tac-Toe</h3>
+      <div class="deg">Nine boards in a 3×3 meta-grid</div>
+      <p>Every move sends your opponent to the matching small board — win three small boards in a row to take the game. Easy or Smart computer, or two players.</p>
       <span class="play">Play →</span>
     </a>
   </div>
